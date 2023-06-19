@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 project(ProfessorSuzu)
 
+set(CMAKE_CXX_FLAGS "-Wall -Wpedantic")
+
 add_definitions(-DBOOST_NETWORK_ENABLE_HTTPS)
 find_package(Boost 1.81.0 REQUIRED COMPONENTS log system)
 
