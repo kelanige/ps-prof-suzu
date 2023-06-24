@@ -17,7 +17,9 @@ namespace Pokemon {
       void OnConnect(boost::beast::error_code ec, boost::asio::ip::tcp::resolver::results_type::endpoint_type ep);
       void OnSSLHandshake(boost::beast::error_code ec);
       void OnHandshake(boost::beast::error_code ec);
+      void OnWrite(boost::beast::error_code ec, std::size_t bytes);
       void OnRead(boost::beast::error_code ec, std::size_t bytes);
+      void OnClose(boost::beast::error_code ec);
 
     private:
       boost::asio::io_context& ioc_;
