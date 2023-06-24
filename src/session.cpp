@@ -17,10 +17,10 @@ namespace Pokemon {
     using ::boost::beast::make_printable;
   }
 
-  Session::Session(boost::asio::io_context& ioc, boost::asio::ssl::context& ctx) :
+  Session::Session(boost::asio::io_context& ioc) :
     ioc_(ioc),
     resolver_(boost::asio::make_strand(ioc)),
-    ws_(boost::asio::make_strand(ioc), ctx),
+    ws_(boost::asio::make_strand(ioc)),
     strand_(ioc.get_executor())
   {}
 
@@ -57,21 +57,7 @@ namespace Pokemon {
           req.set(boost::beast::http::field::user_agent, std::string(BOOST_BEAST_VERSION_STRING) + " websocket-client-async");
         }));
     host_ += ":" + std::to_string(ep.port());
-    ws_.next_layer().async_handshake(boost::asio::ssl::stream_base::client, bind_front_handler(&Session::OnSSLHandshake, shared_from_this()));
-  }
-
-  void Session::OnSSLHandshake(boost::beast::error_code ec) {
-    if (ec) {
-      BOOST_LOG_TRIVIAL(error) << ec.message();
-      return;
-    }
-    BOOST_LOG_TRIVIAL(trace) << "OnSSLHandshake(" << ec.to_string() << ")";
-    get_lowest_layer(ws_).expires_never();
-    ws_.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::client));
-    ws_.set_option(boost::beast::websocket::stream_base::decorator([](boost::beast::websocket::request_type& req) {
-          req.set(boost::beast::http::field::user_agent, std::string(BOOST_BEAST_VERSION_STRING) + " websocket-client-async-ssl");
-          }));
-    ws_.async_handshake(host_, endpoint_, bind_executor(strand_, bind_front_handler(&Session::OnHandshake, shared_from_this())));
+    ws_.async_handshake(host_, endpoint_, bind_front_handler(&Session::OnHandshake, shared_from_this()));
   }
 
   void Session::OnHandshake(boost::beast::error_code ec) {
