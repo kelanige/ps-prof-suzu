@@ -13,10 +13,14 @@ find_package(OpenSSL 3.1.1 REQUIRED COMPONENTS SSL)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
-  add_library(Session src/session.cpp)
-  target_link_libraries(Session Boost::log Boost::system)
+  add_library(Parser src/parser.cc)
+  target_link_libraries(Parser Boost::log)
 
-  add_executable(ProfessorSuzu src/main.cpp)
+  add_library(Session src/session.cc)
+  target_link_libraries(Session Boost::log Boost::system)
+  target_link_libraries(Session Parser)
+
+  add_executable(ProfessorSuzu src/main.cc)
   target_link_libraries(ProfessorSuzu Session)
 endif()
 

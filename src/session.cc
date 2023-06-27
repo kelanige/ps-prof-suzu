@@ -1,4 +1,4 @@
-#include "session.hpp"
+#include "session.h"
 
 #include <chrono>
 #include <string>
@@ -25,7 +25,7 @@ namespace Pokemon {
   {}
 
   void Session::Run(const std::string& host, const std::string& port, const std::string& endpoint) {
-    BOOST_LOG_TRIVIAL(trace) << "Run(" << host << "," << port << "," << endpoint << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::Run(" << host << "," << port << "," << endpoint << ")";
     host_ = host;
     endpoint_ = endpoint;
 
@@ -38,7 +38,7 @@ namespace Pokemon {
       BOOST_LOG_TRIVIAL(error) << ec.message();
       return;
     }
-    BOOST_LOG_TRIVIAL(trace) << "OnResolve(" << ec.to_string() << "," << "TODO: results" << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::OnResolve(" << ec.to_string() << "," << "TODO: results" << ")";
     get_lowest_layer(ws_).expires_after(std::chrono::seconds(30));
     get_lowest_layer(ws_).async_connect(results, bind_executor(strand_, bind_front_handler(&Session::OnConnect, shared_from_this())));
   }
@@ -49,7 +49,7 @@ namespace Pokemon {
       BOOST_LOG_TRIVIAL(error) << ec.message();
       return;
     }
-    BOOST_LOG_TRIVIAL(trace) << "OnConnect(" << ec.to_string() << "," << "TODO: endpoint_type" << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::OnConnect(" << ec.to_string() << "," << "TODO: endpoint_type" << ")";
     get_lowest_layer(ws_).expires_never();
 
     ws_.set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::client));
@@ -65,7 +65,7 @@ namespace Pokemon {
       BOOST_LOG_TRIVIAL(error) << ec.message();
       return;
     }
-    BOOST_LOG_TRIVIAL(trace) << "OnHandshake(" << ec.to_string() << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::OnHandshake(" << ec.to_string() << ")";
     ws_.async_read(buffer_, bind_executor(strand_, bind_front_handler(&Session::OnRead, shared_from_this())));
   }
 
@@ -74,7 +74,7 @@ namespace Pokemon {
       BOOST_LOG_TRIVIAL(error) << ec.message();
       return;
     }
-    BOOST_LOG_TRIVIAL(trace) << "OnWrite(" << ec.to_string() << "," << bytes << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::OnWrite(" << ec.to_string() << "," << bytes << ")";
     BOOST_LOG_TRIVIAL(debug) << "Buffer: " << make_printable(buffer_.data());
     ws_.async_read(buffer_, bind_executor(strand_, bind_front_handler(&Session::OnRead, shared_from_this())));
   }
@@ -84,8 +84,10 @@ namespace Pokemon {
       BOOST_LOG_TRIVIAL(error) << ec.message();
       return;
     }
-    BOOST_LOG_TRIVIAL(trace) << "OnRead(" << ec.to_string() << "," << bytes << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::OnRead(" << ec.to_string() << "," << bytes << ")";
     BOOST_LOG_TRIVIAL(debug) << "Buffer: " << make_printable(buffer_.data());
+    parser_.Parse(buffer_.data());
+    buffer_.consume(bytes);
     ws_.async_close(boost::beast::websocket::close_code::normal, bind_front_handler(&Session::OnClose, shared_from_this()));
   }
 
@@ -94,7 +96,7 @@ namespace Pokemon {
       BOOST_LOG_TRIVIAL(error) << ec.message();
       return;
     }
-    BOOST_LOG_TRIVIAL(trace) << "OnClose(" << ec.to_string() << ")";
+    BOOST_LOG_TRIVIAL(trace) << "Session::OnClose(" << ec.to_string() << ")";
     BOOST_LOG_TRIVIAL(debug) << "Buffer: " << make_printable(buffer_.data());
   }
 

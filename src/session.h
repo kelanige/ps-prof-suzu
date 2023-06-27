@@ -7,6 +7,8 @@
 #include <boost/beast/websocket/ssl.hpp>
 #include <boost/beast/ssl.hpp>
 
+#include "parser.h"
+
 namespace Pokemon {
   // TODO: add SSL for secure connection.
   class Session : public std::enable_shared_from_this<Session> {
@@ -29,6 +31,7 @@ namespace Pokemon {
       boost::asio::strand<boost::asio::io_context::executor_type> strand_;
       std::string host_;
       std::string endpoint_;
+      Parser parser_;
   };
 }
 

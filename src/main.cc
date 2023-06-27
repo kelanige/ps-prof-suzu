@@ -5,7 +5,7 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
 
-#include "session.hpp"
+#include "session.h"
 
 int main(int argc, char** argv) {
   boost::asio::io_context ioc;
